@@ -1,1 +1,1 @@
-# SD_Practica2
+# SD_Distributed_Architecture
