@@ -23,11 +23,11 @@ class SimpleClient:
         self.stub = KVStoreStub(self.channel)
 
     def get(self, key: int) -> Union[str, None]:
-
           get_request=KVStore.protos.kv_store_pb2.GetRequest()
           get_request.key = key
           respuesta=self.stub.Get(get_request)
           resp=_get_return(respuesta)
+          logger.info(f"{resp}")
        	  return resp
 
     def l_pop(self, key: int) -> Union[str, None]:
@@ -41,7 +41,9 @@ class SimpleClient:
         """
 
     def put(self, key: int, value: str):
-        put_request=PutRequest(key=key,value=value)
+        put_request=KVStore.protos.kv_store_pb2.PutRequest()
+        put_request.key = key
+        put_request.value = value
         self.stub.Put(put_request)
     def append(self, key: int, value: str):
         """
@@ -100,8 +102,6 @@ class ShardReplicaClient(ShardClient):
         """
         To fill with your code
         """
-
-
     def r_pop(self, key: int) -> Union[str, None]:
         """
         To fill with your code

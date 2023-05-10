@@ -18,14 +18,14 @@ class SimpleKVStoreTests(Test):
 
         assert (test_put(client, 33, "?!?!?"))
         assert (test_get(client, 33, "?!?!?"))
-        '''
+        
         assert (test_append(client, 45, "huh?"))
         assert (test_get(client, 45, "huh?"))
         assert (test_put(client, 45, "huh!"))
         assert (test_get(client, 45, "huh!"))
         assert (test_append(client, 45, "?"))
         assert (test_get(client, 45, "huh!?"))
-
+       '''
         assert (test_l_pop(client, 3, None))
         assert (test_l_pop(client, 45, "h"))
         assert (test_r_pop(client, 45, "?"))

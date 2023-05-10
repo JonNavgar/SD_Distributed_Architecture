@@ -63,7 +63,7 @@ class KVStorageSimpleService(KVStorageService):
         """
 
     def put(self, key: int, value: str):
-        database['key']='value'
+        self.database[key]=value
     def append(self, key: int, value: str):
         """
         To fill with your code
@@ -141,7 +141,6 @@ class KVStorageServicer(KVStoreServicer):
           respuesta=GetResponse(value=value)
         else:
           respuesta=GetResponse()
-          print(respuesta)
         return respuesta
 
     def LPop(self, request: GetRequest, context) -> GetResponse:
@@ -155,10 +154,10 @@ class KVStorageServicer(KVStoreServicer):
         """
 
     def Put(self, request: PutRequest, context) -> google_dot_protobuf_dot_empty__pb2.Empty:
-        """
-        To fill with your code
-        """
-
+        key = request.key
+        value = request.value
+        self.storage_service.put(key,value)
+        return google_dot_protobuf_dot_empty__pb2.Empty()
     def Append(self, request: AppendRequest, context) -> google_dot_protobuf_dot_empty__pb2.Empty:
         """
         To fill with your code
