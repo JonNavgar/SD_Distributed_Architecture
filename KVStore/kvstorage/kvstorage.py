@@ -49,15 +49,9 @@ class KVStorageService:
 class KVStorageSimpleService(KVStorageService):
 
     def __init__(self):
-        """
-        To fill with your code
-        """
-
+        self.database={}
     def get(self, key: int) -> Union[str, None]:
-        """
-        To fill with your code
-        """
-
+          return self.database.get(key)
     def l_pop(self, key: int) -> Union[str, None]:
         """
         To fill with your code
@@ -69,10 +63,7 @@ class KVStorageSimpleService(KVStorageService):
         """
 
     def put(self, key: int, value: str):
-        """
-        To fill with your code
-        """
-
+        database['key']='value'
     def append(self, key: int, value: str):
         """
         To fill with your code
@@ -143,9 +134,15 @@ class KVStorageServicer(KVStoreServicer):
         """
 
     def Get(self, request: GetRequest, context) -> GetResponse:
-        """
-        To fill with your code
-        """
+
+        key=request.key
+        value=self.storage_service.get(key)
+        if value is not None:
+          respuesta=GetResponse(value=value)
+        else:
+          respuesta=GetResponse()
+          print(respuesta)
+        return respuesta
 
     def LPop(self, request: GetRequest, context) -> GetResponse:
         """

@@ -1,6 +1,7 @@
 from typing import Union, Dict
 import grpc
 import logging
+import KVStore.protos.kv_store_pb2
 from KVStore.protos.kv_store_pb2 import GetRequest, PutRequest, GetResponse
 from KVStore.protos.kv_store_pb2_grpc import KVStoreStub
 from KVStore.protos.kv_store_shardmaster_pb2 import QueryRequest, QueryResponse, QueryReplicaRequest, Operation
@@ -17,14 +18,17 @@ def _get_return(ret: GetResponse) -> Union[str, None]:
 
 class SimpleClient:
     def __init__(self, kvstore_address: str):
+
         self.channel = grpc.insecure_channel(kvstore_address)
         self.stub = KVStoreStub(self.channel)
 
     def get(self, key: int) -> Union[str, None]:
-        """
-        To fill with your code
-        """
 
+          get_request=KVStore.protos.kv_store_pb2.GetRequest()
+          get_request.key = key
+          respuesta=self.stub.Get(get_request)
+          resp=_get_return(respuesta)
+       	  return resp
 
     def l_pop(self, key: int) -> Union[str, None]:
         """
@@ -37,10 +41,8 @@ class SimpleClient:
         """
 
     def put(self, key: int, value: str):
-        """
-        To fill with your code
-        """
-
+        put_request=PutRequest(key=key,value=value)
+        self.stub.Put(put_request)
     def append(self, key: int, value: str):
         """
         To fill with your code
