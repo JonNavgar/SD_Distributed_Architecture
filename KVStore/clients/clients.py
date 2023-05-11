@@ -27,29 +27,38 @@ class SimpleClient:
           get_request.key = key
           respuesta=self.stub.Get(get_request)
           resp=_get_return(respuesta)
-          logger.info(f"{resp}")
        	  return resp
 
     def l_pop(self, key: int) -> Union[str, None]:
-        """
-        To fill with your code
-        """
+        
+        lpop_request=KVStore.protos.kv_store_pb2.GetRequest()
+        lpop_request.key = key
+        respuesta=self.stub.LPop(lpop_request)
+        resp=_get_return(respuesta)
+        return resp
 
     def r_pop(self, key: int) -> Union[str, None]:
-        """
-        To fill with your code
-        """
-
+        
+        rpop_request=KVStore.protos.kv_store_pb2.GetRequest()
+        rpop_request.key = key
+        respuesta=self.stub.RPop(rpop_request)
+        resp=_get_return(respuesta)
+        return resp
+        
     def put(self, key: int, value: str):
+    
         put_request=KVStore.protos.kv_store_pb2.PutRequest()
         put_request.key = key
         put_request.value = value
         self.stub.Put(put_request)
+        
     def append(self, key: int, value: str):
-        """
-        To fill with your code
-        """
-
+    
+        append_request=KVStore.protos.kv_store_pb2.AppendRequest()
+        append_request.key = key
+        append_request.value = value
+        self.stub.Append(append_request)
+        
     def stop(self):
         self.channel.close()
 

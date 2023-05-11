@@ -5,7 +5,7 @@ import logging
 import grpc
 from KVStore.protos.kv_store_pb2 import *
 from KVStore.protos.kv_store_pb2_grpc import KVStoreServicer, KVStoreStub
-
+import threading 
 from KVStore.protos.kv_store_shardmaster_pb2 import Role
 
 EVENTUAL_CONSISTENCY_INTERVAL: int = 2
@@ -49,26 +49,48 @@ class KVStorageService:
 class KVStorageSimpleService(KVStorageService):
 
     def __init__(self):
+    
         self.database={}
+        self.lock = threading.Lock()
+        
     def get(self, key: int) -> Union[str, None]:
+    
           return self.database.get(key)
+          
     def l_pop(self, key: int) -> Union[str, None]:
-        """
-        To fill with your code
-        """
+        
+        self.lock.acquire()
+        value=self.database.get(key)
+        pop = value[0]
+        val = value[1:]
+        self.database[key]=val
+        self.lock.release()
+        return pop
 
     def r_pop(self, key: int) -> Union[str, None]:
-        """
-        To fill with your code
-        """
+        
+        self.lock.acquire()
+        value=self.database.get(key)
+        pop = value[-1]
+        val = value[:-1]
+        self.database[key]=val
+        self.lock.release()
+        return pop
+
 
     def put(self, key: int, value: str):
+    
         self.database[key]=value
+        
     def append(self, key: int, value: str):
-        """
-        To fill with your code
-        """
-
+        
+      self.lock.acquire()
+      if key in self.database:
+        self.database[key]= self.database[key] + value 
+      else:
+        self.database[key] = value
+      self.lock.release()
+       
     def redistribute(self, destination_server: str, lower_val: int, upper_val: int):
         """
         To fill with your code
@@ -97,9 +119,7 @@ class KVStorageReplicasService(KVStorageSimpleService):
 
     def r_pop(self, key: int) -> str:
         """
-        To fill with your code
         """
-
     def put(self, key: int, value: str):
         """
         To fill with your code
@@ -144,24 +164,42 @@ class KVStorageServicer(KVStoreServicer):
         return respuesta
 
     def LPop(self, request: GetRequest, context) -> GetResponse:
-        """
-        To fill with your code
-        """
-
+               
+        key = request.key
+        value=self.storage_service.get(key)
+        if value is None:
+          return GetResponse()
+        elif len(value)==0:
+          return GetResponse(value="")
+        else:
+          pop=self.storage_service.l_pop(key)
+          return GetResponse(value=pop)
+          
     def RPop(self, request: GetRequest, context) -> GetResponse:
-        """
-        To fill with your code
-        """
-
+        
+        key = request.key
+        value=self.storage_service.get(key)
+        if value is None:
+          return GetResponse()
+        elif len(value)==0:
+          return GetResponse(value="")
+        else:
+          pop=self.storage_service.r_pop(key)
+          return GetResponse(value=pop)
+          
     def Put(self, request: PutRequest, context) -> google_dot_protobuf_dot_empty__pb2.Empty:
+    
         key = request.key
         value = request.value
         self.storage_service.put(key,value)
         return google_dot_protobuf_dot_empty__pb2.Empty()
+        
     def Append(self, request: AppendRequest, context) -> google_dot_protobuf_dot_empty__pb2.Empty:
-        """
-        To fill with your code
-        """
+    
+        key = request.key
+        value = request.value
+        self.storage_service.append(key,value)
+        return google_dot_protobuf_dot_empty__pb2.Empty()
 
     def Redistribute(self, request: RedistributeRequest, context) -> google_dot_protobuf_dot_empty__pb2.Empty:
         """

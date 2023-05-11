@@ -23,15 +23,15 @@ if __name__ == '__main__':
         print("-Simple tests-")
         test1 = SimpleKVStoreTests(master_address, 1)
         test1.test()
-        '''
+        
         print("-Parallel tests-")
         test2 = SimpleKVStoreParallelTests(master_address, NUM_CLIENTS)
         test2.test()
-
+        
         print("-Race condition tests-")
         test2 = SimpleKVStoreRaceTests(master_address, NUM_CLIENTS)
         test2.test()
-        '''
+        
     except KeyboardInterrupt:
         pass
 
