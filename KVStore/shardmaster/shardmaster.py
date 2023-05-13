@@ -27,9 +27,8 @@ class ShardMasterService:
 
 class ShardMasterSimpleService(ShardMasterService):
     def __init__(self):
-        """
-        To fill with your code
-        """
+       
+       
 
     def join(self, server: str):
         """
@@ -73,9 +72,7 @@ class ShardMasterReplicasService(ShardMasterSimpleService):
 class ShardMasterServicer(ShardMasterServicer):
     def __init__(self, shard_master_service: ShardMasterService):
         self.shard_master_service = shard_master_service
-        """
-        To fill with your code
-        """
+        
 
     def Join(self, request: JoinRequest, context) -> google_dot_protobuf_dot_empty__pb2.Empty:
         """
@@ -88,9 +85,9 @@ class ShardMasterServicer(ShardMasterServicer):
         """
 
     def Query(self, request: QueryRequest, context) -> QueryResponse:
-        """
-        To fill with your code
-        """
+        
+        address=request.query(request.key)
+        return QueryResponse(server=address)
 
     def JoinReplica(self, request: JoinRequest, context) -> JoinReplicaResponse:
         """
@@ -101,3 +98,4 @@ class ShardMasterServicer(ShardMasterServicer):
         """
         To fill with your code
         """
+

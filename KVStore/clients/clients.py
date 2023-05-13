@@ -67,39 +67,42 @@ class ShardClient(SimpleClient):
     def __init__(self, shard_master_address: str):
         self.channel = grpc.insecure_channel(shard_master_address)
         self.stub = ShardMasterStub(self.channel)
-        """
-        To fill with your code
-        """
+        
+
+    def address_config(self, key) -> Union[str, None]:
+    
+        query_request=KVStore.protos.kv_store_shardmaster_pb2.QueryRequest()
+        query_request.key = key
+        query_response=self.stub.Query(query_request)
+        address=query_response.server
+        client=SimpleClient(address)
+        return client
 
     def get(self, key: int) -> Union[str, None]:
-        """
-        To fill with your code
-        """
+        
+        client = self.address_config(key)
+        return client.get(key)
 
     def l_pop(self, key: int) -> Union[str, None]:
-        """
-        To fill with your code
-        """
-
-
+        
+        client = self.address_config(key)
+        return client.lpop(key)
+        
     def r_pop(self, key: int) -> Union[str, None]:
-        """
-        To fill with your code
-        """
-
+    
+        client = self.address_config(key)
+        return client.rpop(key)
 
     def put(self, key: int, value: str):
-        """
-        To fill with your code
-        """
-
+        
+        client = self.address_config(key)
+        return client.put(key,value)
 
     def append(self, key: int, value: str):
-        """
-        To fill with your code
-        """
-
-
+    
+        client = self.address_config(key)
+        return client.append(key,value)
+        
 class ShardReplicaClient(ShardClient):
 
     def get(self, key: int) -> Union[str, None]:
