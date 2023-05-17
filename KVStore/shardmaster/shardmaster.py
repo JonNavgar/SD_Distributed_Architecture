@@ -1,5 +1,4 @@
 import logging
-from KVStore.tests.utils import KEYS_LOWER_THRESHOLD, KEYS_UPPER_THRESHOLD
 from KVStore.protos.kv_store_pb2 import RedistributeRequest, ServerRequest
 from KVStore.protos.kv_store_pb2_grpc import KVStoreStub
 from KVStore.protos.kv_store_shardmaster_pb2_grpc import ShardMasterServicer
@@ -27,13 +26,14 @@ class ShardMasterService:
 
 class ShardMasterSimpleService(ShardMasterService):
     def __init__(self):
-       
-       
-
+       self.num_servers=0
+       self.servers={}
+       self.max_key=100
     def join(self, server: str):
-        """
-        To fill with your code
-        """
+
+       self.num_servers = self.num_servers + 1
+       keys_for_server=self.max_key / self.num_servers
+       for (start,end), address in self.servers.items():
 
     def leave(self, server: str):
         """
@@ -41,10 +41,10 @@ class ShardMasterSimpleService(ShardMasterService):
         """
 
     def query(self, key: int) -> str:
-        """
-        To fill with your code
-        """
-
+   
+        for (start,end), address in self.servers.items():
+          if key >= start and key <= end:
+            return address 
 
 class ShardMasterReplicasService(ShardMasterSimpleService):
     def __init__(self, number_of_shards: int):
@@ -72,12 +72,11 @@ class ShardMasterReplicasService(ShardMasterSimpleService):
 class ShardMasterServicer(ShardMasterServicer):
     def __init__(self, shard_master_service: ShardMasterService):
         self.shard_master_service = shard_master_service
-        
 
     def Join(self, request: JoinRequest, context) -> google_dot_protobuf_dot_empty__pb2.Empty:
-        """
-        To fill with your code
-        """
+        
+       self.shard_master_service.join(request.server)
+       return google_dot_protobuf_dot_empty__pb2.Empty()
 
     def Leave(self, request: LeaveRequest, context) -> google_dot_protobuf_dot_empty__pb2.Empty:
         """
@@ -86,7 +85,7 @@ class ShardMasterServicer(ShardMasterServicer):
 
     def Query(self, request: QueryRequest, context) -> QueryResponse:
         
-        address=request.query(request.key)
+        address=self.shard_master_service.query(request.key)
         return QueryResponse(server=address)
 
     def JoinReplica(self, request: JoinRequest, context) -> JoinReplicaResponse:
