@@ -3,7 +3,7 @@ from KVStore.protos.kv_store_pb2 import RedistributeRequest, ServerRequest
 from KVStore.protos.kv_store_pb2_grpc import KVStoreStub
 from KVStore.protos.kv_store_shardmaster_pb2_grpc import ShardMasterServicer
 from KVStore.protos.kv_store_shardmaster_pb2 import *
-
+import grpc
 logger = logging.getLogger(__name__)
 
 
@@ -31,38 +31,46 @@ class ShardMasterSimpleService(ShardMasterService):
        self.max_key=100
        
     def join(self, server: str):
-
-       self.num_servers = self.num_servers + 1
-       keys_for_server=self.max_key / self.num_servers
-       new_servers={}
-       # Crear nuevo diccionario para hacer overlap
-       for i in self.servers:
        
-               key=list(self.servers.keys())[i]
-               address=self.servers[key]
-               new_servers[(i*keys_for_server,(i*keys_for_server)+keys_for_server)]=address
-               
-       # El ultimo valor del nuevo diccionario hay que completarlo con la nueva address
-       i=self.num_servers-1
-       new_servers[(i*keys_for_server,(i*keys_for_server)+keys_for_server)]=server
-       # Comprobar overlap
-       for keys1, val1 in self.servers.items():
-         for keys2, val2 in new_servers.items():
-           # Verificar si hay superposición entre las llaves de las posiciones actuales
-           if set(keys1).intersection(set(keys2)):
-             overlap = set(keys1).intersection(set(keys2))
-             redistribute(val2,overlap[0],overlap[1]) 
-                   
+      self.num_servers = self.num_servers + 1
+      keys_for_server=int(self.max_key / self.num_servers)
+      new_servers={}
+      # Crear nuevo diccionario para hacer overlap
+      i=0
+      for clave, address in self.servers.items():
+        key1=i*keys_for_server
+        key2=(i*keys_for_server)+(keys_for_server-1)
+        new_servers[(key1,key2)]=address 
+        i=i+1            
+      # El ultimo valor del nuevo diccionario hay que completarlo con la nueva address
+      i=self.num_servers-1
+      key1=i*keys_for_server
+      key2=(i*keys_for_server)+(keys_for_server-1)
+      new_servers[(key1,key2)]=server
+      # Comprobar overlap
+      for keys1, val1 in self.servers.items():
+        for keys2, val2 in new_servers.items():
+        # Verificar si hay superposición entre las llaves de las posiciones actuales
+           valor1_min, valor1_max = keys1
+           valor2_min, valor2_max = keys2
+           interseccion_min = max(valor1_min, valor2_min)
+           interseccion_max = min(valor1_max, valor2_max)
+           if interseccion_min <= interseccion_max:
+             redistribute_request=RedistributeRequest(destination_server=server,lower_val=interseccion_min,upper_val=interseccion_max)
+             channel = grpc.insecure_channel(server)
+             stub = KVStoreStub(channel)
+             stub.Redistribute(redistribute_request)
+      self.servers = new_servers.copy()         
     def leave(self, server: str):
         """
         To fill with your code
         """
 
     def query(self, key: int) -> str:
-   
-        for (start,end), address in self.servers.items():
-          if key >= start and key <= end:
-            return address 
+    
+          for (start,end), address in self.servers.items():
+            if key >= start and key <= end:
+              return address
 
 class ShardMasterReplicasService(ShardMasterSimpleService):
     def __init__(self, number_of_shards: int):
@@ -97,10 +105,10 @@ class ShardMasterServicer(ShardMasterServicer):
        return google_dot_protobuf_dot_empty__pb2.Empty()
 
     def Leave(self, request: LeaveRequest, context) -> google_dot_protobuf_dot_empty__pb2.Empty:
-        """
-        To fill with your code
-        """
-
+        
+       self.shard_master_service.join(request.server)
+       return google_dot_protobuf_dot_empty__pb2.Empty()
+       
     def Query(self, request: QueryRequest, context) -> QueryResponse:
         
         address=self.shard_master_service.query(request.key)

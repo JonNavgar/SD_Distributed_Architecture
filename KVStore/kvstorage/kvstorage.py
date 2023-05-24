@@ -94,8 +94,8 @@ class KVStorageSimpleService(KVStorageService):
        
     def redistribute(self, destination_server: str, lower_val: int, upper_val: int):
        
-       transfer_request=Transfer_request()
-       for clave, valor in database.items():
+       transfer_request=TransferRequest()
+       for clave, valor in self.database.items():
          if lower_val >= clave < upper_val:
            key_value=KeyValue(key=clave,value=valor)
            transfer_request.key_values.append(key_value)
@@ -106,7 +106,7 @@ class KVStorageSimpleService(KVStorageService):
     def transfer(self, keys_values: List[KeyValue]):
        
        new_database={} 
-       for pair in keys_values.pairs:
+       for pair in keys_values:
          new_database[pair.key]=pair.value
        self.database.update(new_database)
        

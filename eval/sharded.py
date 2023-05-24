@@ -30,7 +30,7 @@ if __name__ ==  '__main__':
         
         test1 = ShardKVSimpleTests(master_address, 1)
         test1.test()
-        '''
+        
         test2 = ShardKVParallelTests(master_address, NUM_CLIENTS)
         test2.test()
         
@@ -38,7 +38,7 @@ if __name__ ==  '__main__':
         wait()
         server_proc.terminate()
         wait()
-        ''' 
+         
     '''
     print("Tests redistributions 1")
     #  Test if the system supports dynamic removal of shards

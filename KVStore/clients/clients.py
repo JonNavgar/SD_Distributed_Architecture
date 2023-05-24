@@ -67,7 +67,6 @@ class ShardClient(SimpleClient):
     def __init__(self, shard_master_address: str):
         self.channel = grpc.insecure_channel(shard_master_address)
         self.stub = ShardMasterStub(self.channel)
-        
 
     def address_config(self, key) -> Union[str, None]:
     
@@ -86,12 +85,12 @@ class ShardClient(SimpleClient):
     def l_pop(self, key: int) -> Union[str, None]:
         
         client = self.address_config(key)
-        return client.lpop(key)
+        return client.l_pop(key)
         
     def r_pop(self, key: int) -> Union[str, None]:
     
         client = self.address_config(key)
-        return client.rpop(key)
+        return client.r_pop(key)
 
     def put(self, key: int, value: str):
         
