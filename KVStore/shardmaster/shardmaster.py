@@ -29,12 +29,30 @@ class ShardMasterSimpleService(ShardMasterService):
        self.num_servers=0
        self.servers={}
        self.max_key=100
+       
     def join(self, server: str):
 
        self.num_servers = self.num_servers + 1
        keys_for_server=self.max_key / self.num_servers
-       for (start,end), address in self.servers.items():
-
+       new_servers={}
+       # Crear nuevo diccionario para hacer overlap
+       for i in self.servers:
+       
+               key=list(self.servers.keys())[i]
+               address=self.servers[key]
+               new_servers[(i*keys_for_server,(i*keys_for_server)+keys_for_server)]=address
+               
+       # El ultimo valor del nuevo diccionario hay que completarlo con la nueva address
+       i=self.num_servers-1
+       new_servers[(i*keys_for_server,(i*keys_for_server)+keys_for_server)]=server
+       # Comprobar overlap
+       for keys1, val1 in self.servers.items():
+         for keys2, val2 in new_servers.items():
+           # Verificar si hay superposición entre las llaves de las posiciones actuales
+           if set(keys1).intersection(set(keys2)):
+             overlap = set(keys1).intersection(set(keys2))
+             redistribute(val2,overlap[0],overlap[1]) 
+                   
     def leave(self, server: str):
         """
         To fill with your code

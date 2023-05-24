@@ -27,18 +27,19 @@ if __name__ ==  '__main__':
 
         storage_proc_end_queues = [start_storage_server_sharded.run(get_port(), SHARDMASTER_PORT) for i in
                                    range(num_servers)]
-
+        
         test1 = ShardKVSimpleTests(master_address, 1)
         test1.test()
         '''
         test2 = ShardKVParallelTests(master_address, NUM_CLIENTS)
         test2.test()
-        '''
+        
         [queue.put(0) for queue in storage_proc_end_queues]
         wait()
         server_proc.terminate()
         wait()
-    '''     
+        ''' 
+    '''
     print("Tests redistributions 1")
     #  Test if the system supports dynamic removal of shards
     num_servers = 5
