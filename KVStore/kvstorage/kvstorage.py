@@ -55,6 +55,7 @@ class KVStorageSimpleService(KVStorageService):
         
     def get(self, key: int) -> Union[str, None]:
     
+          print(self.database)
           return self.database.get(key)
           
     def l_pop(self, key: int) -> Union[str, None]:
@@ -95,10 +96,11 @@ class KVStorageSimpleService(KVStorageService):
     def redistribute(self, destination_server: str, lower_val: int, upper_val: int):
        
        transfer_request=TransferRequest()
+       print(self.database.items())
        for clave, valor in self.database.items():
          if lower_val >= clave < upper_val:
            key_value=KeyValue(key=clave,value=valor)
-           transfer_request.key_values.append(key_value)
+           transfer_request.keys_values.append(key_value)
        channel = grpc.insecure_channel(destination_server)
        stub = KVStoreStub(channel)
        stub.Transfer(transfer_request)
@@ -109,7 +111,6 @@ class KVStorageSimpleService(KVStorageService):
        for pair in keys_values:
          new_database[pair.key]=pair.value
        self.database.update(new_database)
-       
 
 class KVStorageReplicasService(KVStorageSimpleService):
     role: Role

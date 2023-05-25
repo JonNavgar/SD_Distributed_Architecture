@@ -18,7 +18,9 @@ class ShardkvAppendTests(Test):
 
         client = ShardClient(self.master_address)
         assert (test_append(client, 81, DATA))
+        print(f"{DATA * (num_iter + 1)} valor")
         assert (test_get(client, 81, DATA * (num_iter + 1)))
+        
         client.stop()
 
     def test(self, num_iter: int):
