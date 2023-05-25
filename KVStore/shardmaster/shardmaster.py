@@ -56,14 +56,16 @@ class ShardMasterSimpleService(ShardMasterService):
            interseccion_min = max(valor1_min, valor2_min)
            interseccion_max = min(valor1_max, valor2_max)
            if interseccion_min <= interseccion_max:
-             redistribute_request=RedistributeRequest(destination_server=server,lower_val=interseccion_min,upper_val=interseccion_max)
-             channel = grpc.insecure_channel(server)
+             redistribute_request=RedistributeRequest(destination_server=val2,lower_val=interseccion_min,upper_val=interseccion_max)
+             channel = grpc.insecure_channel(val1)
              stub = KVStoreStub(channel)
              stub.Redistribute(redistribute_request)
       self.servers = new_servers.copy()         
      
     def leave(self, server: str):
+    
       if self.num_servers > 1:
+      
         self.num_servers = self.num_servers - 1
         keys_for_server=int(self.max_key / self.num_servers)
         new_servers={}
@@ -84,15 +86,17 @@ class ShardMasterSimpleService(ShardMasterService):
             valor2_min, valor2_max = keys2
             interseccion_min = max(valor1_min, valor2_min)
             interseccion_max = min(valor1_max, valor2_max)
-            if interseccion_min <= interseccion_max:
-              redistribute_request=RedistributeRequest(destination_server=server,lower_val=interseccion_min,upper_val=interseccion_max)
-              channel = grpc.insecure_channel(server)
+            if interseccion_min <= interseccion_max and val1 != val2:
+              redistribute_request=RedistributeRequest(destination_server=val2,lower_val=interseccion_min,upper_val=interseccion_max)
+              channel = grpc.insecure_channel(val1)
               stub = KVStoreStub(channel)
               stub.Redistribute(redistribute_request)
         self.servers = new_servers.copy()  
       else: 
+      
         self.num_servers=0
         self.servers={}      
+        
     def query(self, key: int) -> str:
     
           for (start,end), address in self.servers.items():

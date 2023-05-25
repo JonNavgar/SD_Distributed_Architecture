@@ -21,7 +21,7 @@ if __name__ ==  '__main__':
     print("*************Sharded tests**************")
 
     print("Tests with changing shardmasters")
-    '''
+    
     for num_servers in NUM_STORAGE_SERVERS:
         print(f"{num_servers} storage servers.")
         server_proc = start_shardmaster.run(SHARDMASTER_PORT)
@@ -64,7 +64,7 @@ if __name__ ==  '__main__':
     wait()
     server_proc.terminate()
     wait()
-    '''
+    
     print("Test redistribution 2 (keep data after redistribution)")
     # Test if data gets redistributed across shards when the number of nodes changes
     num_servers = 5
